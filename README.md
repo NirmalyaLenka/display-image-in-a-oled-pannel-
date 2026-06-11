@@ -9,7 +9,7 @@ Display a pixel art image on an SSD1306 OLED with a smooth right-to-left slide-i
 ```
 ┌─────────────────────────────┐
 │  ┌──────────────────────┐   │
-│  │  FUCK YOU            │   │
+│  │  your bit map            │   │
 │  └──────────────────┘   │   │
 │            └─┘           │   │
 └─────────────────────────────┘
