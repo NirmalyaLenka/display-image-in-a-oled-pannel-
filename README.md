@@ -120,3 +120,4 @@ To use your own image:
 ## License
  
 MIT — free to use, modify, and distribute.
+for more info
