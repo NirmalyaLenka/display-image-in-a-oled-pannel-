@@ -125,6 +125,19 @@ MIT — free to use, modify, and distribute.
 
 ---
 
+## Skills & technologies
+
+`Arduino/C++`
+
+
+## Repository structure
+
+Key files and folders (not exhaustive):
+
+- `README.md`
+- `STM32_BluePill/STM32_BluePill.ino`
+
+
 ## Maintenance & Audit
 
 - **Audit date:** 10 November 2026
