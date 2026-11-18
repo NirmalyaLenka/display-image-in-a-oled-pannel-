@@ -1,147 +1,68 @@
- OLED Pixel Art Display — Arduino Uno
- 
-Display a pixel art image on an SSD1306 OLED with a smooth right-to-left slide-in animation on every reset.
- 
----
- 
-## Preview
- 
-```
-┌─────────────────────────────┐
-│  ┌──────────────────────┐   │
-│  │  your bit map            │   │
-│  └──────────────────┘   │   │
-│            └─┘           │   │
-└─────────────────────────────┘
-        SSD1306 OLED
-```
- 
----
- 
-## Hardware Required
- 
-| Component | Quantity |
+# OLED Pixel Art Display — SSD1306
+
+This project is intended to draw a 128×64 bitmap on an SSD1306 I²C OLED and animate it sliding in from the right after reset. The currently confirmed firmware file targets an STM32 Blue Pill.
+
+## Current repository status — build blockers
+
+The checked-in files do not currently support the complete Arduino Uno workflow described in the older README:
+
+- `STM32_BluePill/STM32_BluePill.ino` is present and is the firmware file inspected for this review.
+- The documented `Arduino_Uno_FY.ino` was not found at the repository root or under `Arduino_Uno/` during this review.
+- The STM32 sketch includes `../../assets/image_bitmap.h`, but the referenced bitmap header and `assets/image_bitmap.h` were not found in the checked-in paths inspected. The sketch relies on `myImage`, `IMG_WIDTH`, and `IMG_HEIGHT` from that header, so it is not buildable from the confirmed files as they currently stand.
+
+The firmware was deliberately left unchanged. Restore the intended bitmap header and correct its include path, and restore the Uno sketch if that target is still supported, before treating this repository as a buildable project.
+
+## Confirmed STM32 hardware and wiring
+
+| OLED connection | STM32 Blue Pill connection |
 |---|---|
-| Arduino Uno | 1 |
-| SSD1306 OLED Display (128×64, I2C) | 1 |
-| Jumper Wires | 4 |
- 
----
- 
-## Wiring
- 
-| OLED Pin | Arduino Uno Pin |
-|---|---|
-| VCC | 3.3V or 5V |
+| SDA | PB7, as noted in the sketch comments |
+| SCL | PB6, as noted in the sketch comments |
+| VCC | **3.3 V only** |
 | GND | GND |
-| SDA | A4 |
-| SCL | A5 |
- 
----
- 
-## Libraries
- 
-Install both via Arduino IDE — Sketch → Include Library → Manage Libraries:
- 
-- **Adafruit SSD1306**
-- **Adafruit GFX Library**
- 
----
- 
-## How to Flash
- 
-1. Open `Arduino_Uno_FY.ino` in Arduino IDE.
-2. Connect the Arduino Uno via USB.
-3. Select board: **Tools → Board → Arduino Uno**.
-4. Select the correct port: **Tools → Port → COMx** (Windows) or **/dev/ttyUSB0** (Linux/Mac).
-5. Click **Upload**.
- 
----
- 
-## How It Works
- 
-On every reset or power-on, the sketch runs `setup()` which triggers the slide-in animation.
- 
-The image bitmap is stored as a 1024-byte array in flash memory using `PROGMEM`. Each byte encodes 8 horizontal pixels, MSB first. The 128×64 image is drawn using `drawBitmap()` from the Adafruit GFX library.
- 
-The animation works by drawing the bitmap at a decreasing x-offset:
- 
-```cpp
-for (int x = 128; x >= 0; x -= 4) {
-    display.clearDisplay();
-    display.drawBitmap(x, 0, myImage, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
-    display.display();
-    delay(15);
-}
-```
- 
-The image starts fully off-screen to the right at x = 128 and moves left in steps of 4 pixels with a 15ms delay per frame. Total animation time is approximately 500ms. Once the image reaches x = 0 it stays displayed until the next reset. `loop()` is intentionally empty.
- 
----
- 
-## Customizing the Image
- 
-To use your own image:
- 
-1. Resize it to exactly **128 × 64 pixels** in any image editor.
-2. Open [image2cpp](https://javl.github.io/image2cpp/) in a browser.
-3. Use these settings:
-   - Canvas size: `128 x 64`
-   - Invert image: **ON** if your image has dark content on a light background
-   - Code format: `Arduino code`
-   - Draw mode: `Horizontal — 1 bit per pixel`
-4. Click **Generate code** and copy the array.
-5. Replace the `myImage[]` array in the sketch with the copied output.
- 
----
- 
-## Adjusting Animation Speed
- 
-| Parameter | Effect |
-|---|---|
-| Increase step size (e.g. `x -= 8`) | Faster slide |
-| Decrease step size (e.g. `x -= 2`) | Slower, smoother slide |
-| Increase `delay(15)` | Slower slide |
-| Decrease `delay(15)` | Faster slide |
- 
----
- 
-## Troubleshooting
- 
-| Symptom | Fix |
-|---|---|
-| Blank screen | Check SDA→A4, SCL→A5 wiring |
-| Wrong I2C address | Change `0x3C` to `0x3D` in the sketch |
-| Image looks inverted | Swap `WHITE` to `BLACK` in both `drawBitmap()` calls |
-| Compilation error | Confirm both Adafruit libraries are installed |
- 
----
- 
+
+The source configures a 128×64 display and I²C address `0x3C`. Confirm your OLED module's controller, address, and wiring before powering it. Do not apply 5 V to the OLED VCC; the checked-in STM32 sketch explicitly specifies 3.3 V only.
+
+## Required software
+
+- Arduino IDE
+- STM32duino board support for the STM32 Blue Pill target
+- Adafruit SSD1306 library
+- Adafruit GFX Library
+- `Wire`, provided by the selected board core
+
+## Intended animation
+
+The STM32 sketch calls `Wire.begin()`, initializes the SSD1306 display, and halts in a loop if display initialization fails. Its slide-in routine draws the bitmap at decreasing x positions from the screen width to zero, stepping by four pixels with a 15 ms delay, then redraws it at the origin. The image remains on screen until reset. The bitmap dimensions and data are expected from the missing header, so the animation cannot be built from the confirmed checkout yet.
+
+## Build and upload status
+
+Do not treat the current checkout as ready to upload. After the missing bitmap header and include path have been repaired in a future code change:
+
+1. Install Arduino IDE, STM32duino board support, Adafruit SSD1306, and Adafruit GFX.
+2. Open `STM32_BluePill/STM32_BluePill.ino`.
+3. Select the correct STM32 Blue Pill board variant and serial port for your hardware.
+4. Compile before connecting the OLED; resolve missing-header or board-core errors first.
+5. Wire the OLED using the 3.3 V table above and upload only after the sketch compiles.
+
+The earlier Arduino Uno upload steps are not currently actionable because the documented Uno sketch was not found at the checked paths. No firmware compilation, upload, or physical OLED test was performed during this review.
+
+## Troubleshooting after the missing files are restored
+
+- **Blank OLED:** verify SDA/SCL, common ground, supply voltage, and the configured I²C address (`0x3C`).
+- **Compilation fails on `image_bitmap.h`:** the required bitmap header is absent from the confirmed checkout or the include path does not point to it.
+- **Display initialization halts:** the source enters an infinite loop if `display.begin()` fails; check wiring, power, controller compatibility, and address.
+
 ## License
- 
-MIT — free to use, modify, and distribute.
-## For more info or help please contact Carmodbhai@gmaol.com
 
+No root `LICENSE` file was found during this review. Confirm and add the intended license before redistributing the project.
 
 ---
-
-## Skills & technologies
-
-`Arduino/C++`
-
-
-## Repository structure
-
-Key files and folders (not exhaustive):
-
-- `README.md`
-- `STM32_BluePill/STM32_BluePill.ino`
-
 
 ## Maintenance & Audit
 
 - **Audit date:** 11 November 2026
 - **Documentation status:** README reviewed and audit record added on this date.
-- **Scope and evidence:** This is a documentation-level maintenance pass. It does not establish that source code compiles, dependencies are current, security has been tested, or hardware/runtime behavior has been verified.
-- **Code and tests:** No new functional code changes or test results are claimed by this README update. Run project-specific build, test, and hardware/runtime checks before relying on the project.
-- **Maintenance baseline:** Documentation status recorded through 11 November 2026; revisit setup instructions, dependencies, known limitations, and tests when the project changes.
+- **Scope and evidence:** Documentation review of the README and `STM32_BluePill/STM32_BluePill.ino`; the documented Uno sketch and bitmap-header paths were checked and not found at the expected locations.
+- **Code and tests:** No firmware was changed; no compile, upload, or hardware test was performed.
+- **Maintenance baseline:** Documentation status recorded through 11 November 2026; recheck the missing bitmap header, include path, and intended Uno target when the repository changes.
