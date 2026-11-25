@@ -66,3 +66,9 @@ No root `LICENSE` file was found during this review. Confirm and add the intende
 - **Scope and evidence:** Documentation review of the README and `STM32_BluePill/STM32_BluePill.ino`; the documented Uno sketch and bitmap-header paths were checked and not found at the expected locations.
 - **Code and tests:** No firmware was changed; no compile, upload, or hardware test was performed.
 - **Maintenance baseline:** Documentation status recorded through 18 November 2026; recheck the missing bitmap header, include path, and intended Uno target when the repository changes.
+
+## Contact
+
+Maintained up to 25 November 2026.
+
+If you encounter any problems, please contact [carmodbhai@gmail.com](mailto:carmodbhai@gmail.com).
